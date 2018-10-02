@@ -1,7 +1,7 @@
 #include "Animation.h"
 #include <SDL/SDL.h>
 #include <vector>
-#include <libs/TwoDimensionalPoint.h>
+#include "TwoDimensionalPoint.h"
 
 /*
     MineExplosion waits a few seconds then detonates

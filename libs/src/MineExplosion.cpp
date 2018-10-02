@@ -1,7 +1,7 @@
 #include "MineExplosion.h"
-#include <libs/Animation.h>
+#include <inc/Animation.h>
 #include <cmath>
-#include <libs/FloatRect.h>
+#include <inc/FloatRect.h>
 #include <stdexcept>
 
 MineExplosion::MineExplosion(float x, float y) {

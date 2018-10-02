@@ -6,16 +6,16 @@
 #include <list>
 #include <cstdlib>
 
-#include <libs/FloatRect.h>
-#include <libs/Polygon.h>
-#include <libs/Map.h>
-#include <libs/HitBox.h>
-#include <libs/Projectile.h>
-#include <libs/TextTag.h>
+#include <inc/FloatRect.h>
+#include <inc/Polygon.h>
+#include <inc/Map.h>
+#include <inc/HitBox.h>
+#include <inc/Projectile.h>
+#include <inc/TextTag.h>
 
 // animation shiz
-#include <libs/Animation.h>
-#include <libs/MineExplosion.h>
+#include <inc/Animation.h>
+#include <inc/MineExplosion.h>
 
 using namespace std;
 

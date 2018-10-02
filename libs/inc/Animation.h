@@ -9,6 +9,7 @@ public:
     virtual bool update(float delta_time)        = 0;
     virtual bool update(unsigned int delta_time) = 0;
     virtual void draw(SDL_Surface* surface, uint8_t r, uint8_t g, uint8_t b) = 0;
+    virtual ~Animation();
 };
 
 #endif // __JJC__ANIMATION__H__

@@ -1,5 +1,22 @@
-g++ -g -c -o main.o main.cpp -I../ -std=c++11 -march=native -O3
+#!/bin/bash
 
-g++ -o main main.o ../libs/FloatRect.o ../libs/Polygon.o ../libs/HitBox.o \
-../libs/Projectile.o ../libs/MineExplosion.o ../libs/TextTag.o \
--std=c++11 -march=native -O3 -lSDL -lSDL_gfx -lSDL_ttf
+STD_OPTS="-std=c++11 -Wall -O3 -march=native"
+GL_OPTS="-lSDL -lSDL_gfx -lSDL_ttf"
+INC_OPTS="-I../libs/ -I../"
+
+OBJ=( "FloatRect" "HitBox" "MineExplosion" "Polygon" "Projectile" "TextTag" )
+
+# generate object code for main.cpp
+g++ -g -c -o main.o main.cpp $STD_OPTS $INC_OPTS
+
+LINK_STRING="" # empty string to start
+
+# generate linkage string
+for i in "${OBJ[@]}"
+do
+    LINK_STRING+=" ../libs/obj/$i.o" # add every object file needed
+    #echo $LINK_STRING
+done
+
+# generate final executable for main.o
+g++ -o main main.o $LINK_STRING $STD_OPTS $GL_OPTS
