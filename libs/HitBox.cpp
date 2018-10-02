@@ -43,12 +43,26 @@ void HitBox::draw(SDL_Surface* surface, Uint8 r, Uint8 g, Uint8 b) {
     float half_len = this->l / 2.0f;
 
     // upper left corner
-    xs[0] = map(this->x - half_len, 0.0f, FloatRect::screen_width,  0.0f, (float)surface->w);
-    ys[0] = map(this->y - half_len, 0.0f, FloatRect::screen_height, 0.0f, (float)surface->h);
+    xs[0] = map(this->x - half_len, 
+            FloatRect::screen_width_start, 
+            FloatRect::screen_width_start + FloatRect::screen_width,  
+            0.0f, (float)surface->w);
+
+    ys[0] = map(this->y - half_len, 
+            FloatRect::screen_height_start, 
+            FloatRect::screen_height_start + FloatRect::screen_height, 
+            0.0f, (float)surface->h);
 
     // lower right corner
-    xs[1] = map(this->x + half_len, 0.0f, FloatRect::screen_width,  0.0f, (float)surface->w);
-    ys[1] = map(this->y + half_len, 0.0f, FloatRect::screen_height, 0.0f, (float)surface->h);
+    xs[1] = map(this->x + half_len, 
+            FloatRect::screen_width_start, 
+            FloatRect::screen_width_start + FloatRect::screen_width,  
+            0.0f, (float)surface->w);
+
+    ys[1] = map(this->y + half_len,
+            FloatRect::screen_height_start, 
+            FloatRect::screen_height_start + FloatRect::screen_height, 
+            0.0f, (float)surface->h);
     
     rectangleRGBA(surface, xs[0], ys[0], xs[1], ys[1], r, g, b, 255);
 }

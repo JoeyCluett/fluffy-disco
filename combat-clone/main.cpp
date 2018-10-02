@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init(); // prepare to load ttf files
 
+    SDL_ShowCursor(SDL_DISABLE);
+
     // find an acceptable size for monitor resolution
     SDL_Rect** modes = SDL_ListModes(NULL, SDL_FULLSCREEN | SDL_HWSURFACE);
     SDL_Surface* surface = SDL_SetVideoMode(modes[0]->h, modes[0]->h, 32, 
@@ -39,12 +41,17 @@ int main(int argc, char* argv[]) {
     auto font = TTF_OpenFont("28dayslater.ttf", 28);
     SDL_Surface* text;
     SDL_Color text_color = {255, 255, 255};
-    text = TTF_RenderText_Solid(font, "Textually Active", text_color);    
+    text = TTF_RenderText_Solid(font, "Fluffy Disco", text_color);    
 
     // all fill operations use a mapping function
     // convert floats to integer screen coordinates
     FloatRect::screen_height = 1.05f;
     FloatRect::screen_width  = 1.05f;
+
+    //FloatRect::screen_height_start = -0.5f;
+    //FloatRect::screen_width_start  = -0.5f;
+    //FloatRect::screen_height = 2.0f;
+    //FloatRect::screen_width = 2.0f;
 
     // just a few frequently used colors
     int RED        = SDL_MapRGB(surface->format, 255, 0, 0);
@@ -60,6 +67,9 @@ int main(int argc, char* argv[]) {
     FloatRect background{0.0f, 0.0f, 1.0f, 1.0f};
     FloatRect black_background{0.0f, 0.0f, 1.2f, 1.2f};
 
+    FloatRect status_bars_background{0.0f, 1.0f, 0.3f, 1.5f};
+    FloatRect right_side_background{1.0f, -0.5f, 2.0f, 0.5f};
+
     // playfield plus some decorative tiles
     FloatRect r1[] = {
         // playfield used for collision detection
@@ -72,7 +82,13 @@ int main(int argc, char* argv[]) {
         {0.125f + 0.025f, 0.125f + 0.025f, 0.2f, 0.2f},
         {0.625f + 0.025f, 0.125f + 0.025f, 0.2f, 0.2f},
         {0.125f + 0.025f, 0.625f + 0.025f, 0.2f, 0.2f},
-        {0.625f + 0.025f, 0.625f + 0.025f, 0.2f, 0.2f}
+        {0.625f + 0.025f, 0.625f + 0.025f, 0.2f, 0.2f},
+
+        // perimeter used for collision detection
+        {-1.0f, -1.0f, 3.0f, 1.0f}, // left
+        {1.0f, -1.0f,  3.0f, 1.0f}, // right
+        {-1.0f, -1.0f, 1.0f, 3.0f}, // top
+        {-1.0f, 1.0f,  1.0f, 3.0f}  // bottom
     };
 
     const float player_scale = 0.01f;
@@ -83,6 +99,7 @@ int main(int argc, char* argv[]) {
     FloatRect projectile{0.0f, 0.0, 0.005, 0.005};
     projectile += tdp_translate;
 
+    // player (fighter ship)
     Polygon poly(4, 
             {0.0f, 2.0f,  0.0f, -2.0f},   // x coordinates
             {0.0f, -2.0f, 4.0f, -2.0f}); // y coordinates
@@ -101,7 +118,7 @@ int main(int argc, char* argv[]) {
     // scale the hitbox list appropriately
     for(auto& hb : hbs)
         hb *= player_scale;
-    
+
     // a few runtime parameters
     bool turn_left   = false;
     bool turn_right  = false;
@@ -133,6 +150,10 @@ int main(int argc, char* argv[]) {
 
     TextTag fire_label(0.01f, 1.0f, 0.012f, 0.175f);
     fire_label.font = font;
+
+    TextTag shield_label(0.01f, 1.025f, 0.025f, 1.0f);
+    shield_label.font = font;
+    shield_label.text = "Shield";
 
     list<Animation*> animation_list;
 
@@ -262,10 +283,17 @@ int main(int argc, char* argv[]) {
 
         bool should_update_persistent = true;
         for(auto& hb : tf_hitboxes) {
-            for(int i = 0; i < 4; i++) {
+            for(int i = 0; i < 4 && should_update_persistent; i++) {
                 if(hb.collides(r1[i])) {
                     should_update_persistent = false; // dont update player position
-                    r1[i].draw(surface, RED);
+                    //r1[i].draw(surface, RED);
+                }
+            }
+
+            for(int i = 8; i < 12 && should_update_persistent; i++) {
+                if(hb.collides(r1[i])) {
+                    should_update_persistent = false;
+                    //r1[i].draw(surface, RED);
                 }
             }
         }
@@ -330,6 +358,16 @@ int main(int argc, char* argv[]) {
 
             fire = false;
         }
+
+        // add mine to animation list and let go
+        if(drop_mine) {
+            if(fire_meter > 0.6f) {
+                animation_list.push_back(new MineExplosion(player_x_pos, player_y_pos));
+                fire_meter -= 0.6f;
+            }
+            drop_mine = false;
+        }
+
         fire_meter += 0.005f;
         if(fire_meter > 1.0f)
             fire_meter = 1.0f;
@@ -340,19 +378,15 @@ int main(int argc, char* argv[]) {
             shield_meter_amount = 1.0f;
         shield_indicator.w = shield_meter_amount;
 
-        // add mine to animation list and let go
-        if(drop_mine) {
-            animation_list.push_back(new MineExplosion(player_x_pos, player_y_pos));
-            drop_mine = false;
-        }
-
         // update (and remove) projectiles
         // ignore on-field barriers, only test out-of-bounds
         if((frame_count & 0L)) {
             for(auto iter = fr_list.begin(); iter != fr_list.end(); iter++) {
                 auto& e = *iter;
-                if(e.x < 0.0f || e.x > 1.0f || e.y < 0.0f || e.y > 1.0f)
-                    iter = fr_list.erase(iter);
+                for(int i = 8; i < 12; i++) {
+                    if(e.collides(r1[i]))
+                        iter = fr_list.erase(iter);
+                }
             }
         }
 
@@ -379,10 +413,26 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        status_bars_background.draw(surface, BLACK);
+        right_side_background.draw(surface, BLACK);
+
         fire_indicator.draw(surface, YELLOW);
         shield_indicator.draw(surface, GREEN);
-        fire_label.text = "Hello World";
+
+        // use the proper label on the weapon
+        switch(current_weapon_state) {
+            case WEAPON_mg:
+                fire_label.text = "Rifle  "; break;
+            case WEAPON_shotty:
+                fire_label.text = "Shotgun"; break;
+            default:
+                fire_label.text = "UNKNOWN";
+                break;
+        }
+
+        //fire_label.text = "Hello World";
         fire_label.draw(surface, 50, 50, 50);
+        shield_label.draw(surface, 50, 50, 50);
 
         // show some text
         SDL_BlitSurface(text, NULL, surface, NULL);
@@ -400,7 +450,7 @@ int main(int argc, char* argv[]) {
 
     } while(!quit);
 
-    TTF_Quit();
-    SDL_Quit();
+    TTF_Quit(); // free all of the font resources
+    SDL_Quit(); // ... quit SDL
     return 0;
 }
