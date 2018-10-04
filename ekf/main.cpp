@@ -19,11 +19,13 @@ namespace ekf {
     float player_x = 0.0f;
     float player_y = 50.0f;
 
-    float a = 1.0f;
-    float b = 0.5f;
-    float c = 1.0f;
+    float a = 0.5f; // scale previous state estimation
+    float b = 0.5f; // scale control input signal
+    float c = 1.0f; // scale current state estimation
 
-    float p_k = 1.0f;
+    float r = 0.2f; // average noise for environment
+
+    float p_k = 0.0f; // prediction noise
     float x_hat = player_x;
 
 } // end of namespace ekf
@@ -33,9 +35,14 @@ float randFloat(void) {
     return float(rand()) / (double(RAND_MAX) + 1.0f);
 }
 
+float randFloat(float min, float max) {
+    float f = randFloat();
+    return map(f, 0.0f, 1.0f, min, max);
+}
+
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
-    TTF_Init(); // prepare to load ttf files
+    //TTF_Init(); // prepare to load ttf files
 
     SDL_ShowCursor(SDL_DISABLE);
 
@@ -97,7 +104,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        float u_k = 1.0f;
+        float u_k = 0.0f; // control signal
 
         if(player_speed_up) {
             player_x += (0.025f * player_speed * 2.0f);
@@ -109,11 +116,18 @@ int main(int argc, char* argv[]) {
             player_x += (0.025f * player_speed); // constant 40 FPS
         }
 
-        float x_hat = ekf::a*ekf::x_hat + ekf::b*u_k;
-        float z_k   = ekf::c*x_hat + (randFloat() - 0.5f) * 1.0f;
+        // PREDICT
+        float x_hat = ekf::a * ekf::x_hat + ekf::b * u_k; // current state estimation
+                float v_k = randFloat(-0.2f, 0.2f);
+        float z_k   = ekf::c * x_hat + v_k; // observed state
 
-        ekf::player_x = z_k;
-        ekf::x_hat = x_hat;
+        // UPDATE
+        // calculate gain for this cycle
+        float g_k = ekf::p_k * ekf::c / (ekf::c * ekf::p_k * ekf::c + ekf::r);
+        ekf::x_hat = x_hat + g_k * (z_k - ekf::c * x_hat);
+        ekf::p_k   = (1.0f - g_k * ekf::c) * ekf::p_k;
+
+        ekf::player_x = ekf::x_hat;
 
         // render the player and the calculated position
         background.draw(surface, SDL_MapRGB(surface->format, 0, 0, 0));
@@ -137,6 +151,6 @@ int main(int argc, char* argv[]) {
     SDL_Flip(surface);
     SDL_Delay(2000);
 
-    TTF_Quit();
+    //TTF_Quit();
     SDL_Quit();
 }
