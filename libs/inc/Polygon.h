@@ -54,6 +54,12 @@ public:
         return p1;
     }
 
+    friend Polygon operator+(Polygon& p, TwoDimensionalPoint tdp) {
+        Polygon ret = p;
+        ret += tdp;
+        return ret;
+    }
+
 };
 
 #endif // __JJC__POLYGON__H__

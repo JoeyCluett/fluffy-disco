@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# build the Extended Kalman Filter 
+# demonstration. useful for when we 
+# start implementing EKF for Autonomous Snowplow
+
 STD_OPTS="-std=c++11 -Wall -O3 -march=native"
 GL_OPTS="-lSDL -lSDL_gfx -lSDL_ttf"
 INC_OPTS="-I../libs/ -I../"
