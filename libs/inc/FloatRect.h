@@ -21,16 +21,20 @@ public:
 
     // set the screen size in terms of 
     // whatever scale you want
-    void setScreenSize(float h, float w);
+    static void setScreenSize(float h, float w);
+
+    // see if the given point resides in this FloatRect
+    bool hasPt(_2DPt tdp);
 
     // render the square onto the given surface
     virtual void draw(SDL_Surface* surface, int color);
+    virtual void drawOutline(SDL_Surface* surface, uint8_t r, uint8_t g, uint8_t b);
 
     FloatRect& operator+=(TwoDimensionalPoint& tdp);
 
     FloatRect translate(float x, float y) const {
         return FloatRect(this->x + x, this->y + y, this->h, this->w);
     }
-};
+} __attribute__((packed));
 
 #endif // __JJC__FLOAT__SQUARE__H__

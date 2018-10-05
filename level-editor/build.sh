@@ -4,7 +4,8 @@ STD_OPTS="-std=c++11 -Wall -O3 -march=native"
 GL_OPTS="-lSDL -lSDL_gfx -lSDL_ttf"
 INC_OPTS="-I../libs/ -I../"
 
-OBJ=( "Animation" "FloatRect" "HitBox" "MineExplosion" "Polygon" "Projectile" "TextTag" )
+OBJ=( "Animation" "FloatRect" "HitBox" "MineExplosion" \
+"Polygon" "Projectile" "TextTag" "LevelLoader" )
 
 # generate object code for main.cpp
 g++ -g -c -o main.o main.cpp $STD_OPTS $INC_OPTS

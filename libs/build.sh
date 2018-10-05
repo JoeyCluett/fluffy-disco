@@ -32,7 +32,8 @@ then
     echo "${YEL}  Building object (.o) files for linking..."
 
     # list of files that need to be compiled into object code
-    LINK_FILES=( "Animation" "FloatRect" "HitBox" "MineExplosion" "Polygon" "Projectile" "TextTag" )
+    LINK_FILES=( "Animation" "FloatRect" "HitBox" "MineExplosion" \
+    "Polygon" "Projectile" "TextTag" "LevelLoader" )
 
     for i in "${LINK_FILES[@]}" # iterate through the files
     do
