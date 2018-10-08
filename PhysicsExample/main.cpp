@@ -31,7 +31,8 @@ int main(int argc, char* argv[]) {
         {255, 255, 255, 255}
     };
 
-    b2Vec2 gravity(0.0f, 98.1f);
+    //b2Vec2 gravity(0.0f, 98.1f);
+    b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
 
     b2BodyDef groundBodyDef;
