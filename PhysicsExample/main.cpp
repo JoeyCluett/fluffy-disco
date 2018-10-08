@@ -168,6 +168,16 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        for(auto iter = body_circle_vec.begin(); iter != body_circle_vec.end();) {
+            RGB_B2Body& b = *iter;
+            if(current_time - b.start_time > 20000) {
+                world.DestroyBody(b.body);
+                iter = body_circle_vec.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+
         SDL_Delay(14);
     }
 
