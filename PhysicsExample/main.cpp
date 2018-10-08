@@ -12,7 +12,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
-    b2Vec2 gravity(0.0f, -1.81f);
+    b2Vec2 gravity(0.0f, -0.981f);
     b2World world(gravity);
 
     b2BodyDef groundBodyDef;
@@ -24,10 +24,12 @@ int main(int argc, char* argv[]) {
     groundBox.SetAsBox(20.0f, 10.0f);
     ground_body->CreateFixture(&groundBox, 0.0f);
 
+    float object_start_height = 10.0f;
+
     // define a dynamic body
     b2BodyDef bodyDef; // collision body
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(10.0f, 10.0f);
+    bodyDef.position.Set(object_start_height, object_start_height);
     b2Body* body = world.CreateBody(&bodyDef);
 
     b2PolygonShape dynamicBox;
@@ -52,8 +54,8 @@ int main(int argc, char* argv[]) {
             SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN);
 
     // change scaling for our screen
-    FloatRect::screen_height = 20.0f;
-    FloatRect::screen_width = 20.0f;
+    FloatRect::screen_height = 2*object_start_height;
+    FloatRect::screen_width  = 2*object_start_height;
 
     Polygon draw_polygon(
         4,
@@ -95,8 +97,8 @@ int main(int argc, char* argv[]) {
         for(int i = 0; i < surface->w -1; i++) {
             float first_x  = map((float)i, 0.0f, (float)surface->w, 0.0f, 300.0f);
             float second_x = map((float)(i+1), 0.0f, (float)surface->w, 0.0f, 300.0f);
-            int first_y  = map(y_pos_record[first_x], 0.0f, 10.0f, (float)surface->h, 0.0f);
-            int second_y = map(y_pos_record[second_x], 0.0f, 10.0f, (float)surface->h, 0.0f);
+            int first_y  = map(y_pos_record[first_x], 0.0f, object_start_height, (float)surface->h, 0.0f);
+            int second_y = map(y_pos_record[second_x], 0.0f, object_start_height, (float)surface->h, 0.0f);
 
             lineRGBA(surface, i, first_y, i+1, second_y, 0, 255, 0, 255);
         }
