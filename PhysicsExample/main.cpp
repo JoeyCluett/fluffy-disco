@@ -7,16 +7,35 @@
 
 #include <inc/FloatRect.h>
 #include <inc/Map.h>
+#include <inc/RGBColor.h>
 
 using namespace std;
 
+struct RGB_B2Body {
+    b2Body* body;
+    RGBColor color;
+    unsigned int start_time;
+};
+
 int main(int argc, char* argv[]) {
 
-    b2Vec2 gravity(0.0f, -0.981f);
+    float object_start_height = 10.0f;
+
+    // array of colors
+    RGBColor rgb_arr[] = {
+        {255, 0, 0, 255},
+        {0, 255, 0, 255},
+        {0, 0, 255, 255},
+        {255, 255, 0, 255},
+        {255, 0, 255, 255},
+        {255, 255, 255, 255}
+    };
+
+    b2Vec2 gravity(0.0f, 9.81f);
     b2World world(gravity);
 
     b2BodyDef groundBodyDef;
-    groundBodyDef.position.Set(0.0f, -10.0f);
+    groundBodyDef.position.Set(0.0f, (2*object_start_height)+10.0f);
 
     b2Body* ground_body = world.CreateBody(&groundBodyDef);
 
@@ -24,24 +43,9 @@ int main(int argc, char* argv[]) {
     groundBox.SetAsBox(20.0f, 10.0f);
     ground_body->CreateFixture(&groundBox, 0.0f);
 
-    float object_start_height = 10.0f;
-
-    // define a dynamic body
-    b2BodyDef bodyDef; // collision body
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(object_start_height, object_start_height);
-    b2Body* body = world.CreateBody(&bodyDef);
-
+    // dimensions of the collision bodies (dynamically generated bodies)
     b2PolygonShape dynamicBox;
     dynamicBox.SetAsBox(1.0f, 1.0f);
-
-    // define dynamic body fixture
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &dynamicBox;
-    fixtureDef.density = 1.0f;
-    fixtureDef.friction = 0.3f;
-
-    body->CreateFixture(&fixtureDef);
 
     float timestep = 1.0f / 60.0f;
     int32 vel_iters = 6;
@@ -63,47 +67,86 @@ int main(int argc, char* argv[]) {
         {-1.0f, -1.0f, 1.0f, 1.0f}
     );
 
-    std::vector<float> y_pos_record;
+    vector<RGB_B2Body> body_ptr_vec;
 
-    for(int i = 0; i < 300; i++) {
-        world.Step(timestep, vel_iters, pos_iters);
-        auto position = body->GetPosition();
-        auto angle    = body->GetAngle();
-
-        auto p = draw_polygon + _2DPt{position.x, position.y};
-
-        // render sequence
-        SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
-        p.draw(surface, 255, 0, 0);
-        SDL_Flip(surface);
-        SDL_Delay(25);
-
-        cout << "x: " << position.x << ", y: " << position.y << ", angle: " << angle << endl;
-        y_pos_record.push_back(position.y);
-    }
-
+    //for(int i = 0; i < 300; i++) {
     bool quit = false;
+    bool mouse_used = false;
+    float mouse_x, mouse_y;
     while(!quit) {
         SDL_Event e;
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
                 quit = true;
             }
+            else if(e.type == SDL_MOUSEBUTTONDOWN) {
+                mouse_used = true;
+                mouse_x = e.button.x;
+                mouse_y = e.button.y;
+            }
         }
 
+        if(mouse_used) {
+            float mapped_x = map(mouse_x, 0.0f, (float)surface->w, 0.0f, FloatRect::screen_width);
+            float mapped_y = map(mouse_y, 0.0f, (float)surface->h, 0.0f, FloatRect::screen_height);
+
+            b2BodyDef bodyDef;
+            bodyDef.type = b2_dynamicBody;
+            bodyDef.position.Set(mapped_x, mapped_y);
+
+            b2Body* body = world.CreateBody(&bodyDef);
+
+            b2FixtureDef fixtureDef;
+            fixtureDef.shape = &dynamicBox;
+            fixtureDef.density = 1.0f;
+            fixtureDef.friction = 0.3f;
+
+            body->CreateFixture(&fixtureDef);
+            body->SetAngularVelocity(3.0f*M_PI);
+            body_ptr_vec.push_back({body, rgb_arr[rand() % 6], SDL_GetTicks()});
+
+            mouse_used = false;
+        }
+
+        world.Step(timestep, vel_iters, pos_iters);
+        //auto position = body->GetPosition();
+        //auto angle    = body->GetAngle();
+
+        //auto p = draw_polygon + _2DPt{position.x, position.y};
+
+        // render sequence
         SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
+        //p.draw(surface, 255, 0, 0);
 
-        // render a line indicating what the record was
-        for(int i = 0; i < surface->w -1; i++) {
-            float first_x  = map((float)i, 0.0f, (float)surface->w, 0.0f, 300.0f);
-            float second_x = map((float)(i+1), 0.0f, (float)surface->w, 0.0f, 300.0f);
-            int first_y  = map(y_pos_record[first_x], 0.0f, object_start_height, (float)surface->h, 0.0f);
-            int second_y = map(y_pos_record[second_x], 0.0f, object_start_height, (float)surface->h, 0.0f);
+        for(auto& ptr : body_ptr_vec) {
+            auto position = ptr.body->GetPosition();
+            auto angle    = ptr.body->GetAngle();
 
-            lineRGBA(surface, i, first_y, i+1, second_y, 0, 255, 0, 255);
+            auto p = draw_polygon.rotate(angle);
+            p += _2DPt{position.x, position.y};
+
+            RGBColor& c = ptr.color;
+
+            p.draw(surface, c.r, c.g, c.b);
         }
+
         SDL_Flip(surface);
-        SDL_Delay(40);
+
+        // iterate through body array, remove items that are past their lifetime
+        auto current_time = SDL_GetTicks();
+        for(auto iter = body_ptr_vec.begin(); iter != body_ptr_vec.end();) {
+            RGB_B2Body& b = *iter;
+            if(current_time - b.start_time > 5000) { // 5 seconds
+                world.DestroyBody(b.body);
+                iter = body_ptr_vec.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+
+        SDL_Delay(14);
+
+        //cout << "x: " << position.x << ", y: " << position.y << ", angle: " << angle << endl;
     }
 
     SDL_Quit();
