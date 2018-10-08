@@ -27,6 +27,11 @@ float randFloat(void) {
     return float(rand()) / (double(RAND_MAX) + 1.0f);
 }
 
+float randFloat(float start, float end) {
+    float tmp = rand() % 1000000;
+    return map(tmp, 0.0f, 1000000.0f, start, end);
+}
+
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init(); // prepare to load ttf files
@@ -90,6 +95,7 @@ int main(int argc, char* argv[]) {
     };
 
     const float player_scale = 0.01f;
+    //const float player_scale = 0.06f;
 
     TwoDimensionalPoint tdp_scale{player_scale, player_scale};
     TwoDimensionalPoint tdp_translate{0.5f, 0.5f};
@@ -339,7 +345,7 @@ int main(int argc, char* argv[]) {
                     // 1 projectile every 1.5 seconds
                     if(fire_meter > 0.5f) {
                         for(int i = 0; i < 10; i++) { // for every pellet
-                            float rand_rads = rads + ((randFloat() - 0.5f) * 0.35f); // more spread
+                            float rand_rads = rads + randFloat(-0.5f, 0.5f); // more spread
                             Projectile pr(player_x_pos, player_y_pos, 0.005f, rand_rads, 1.0f);
                             fr_list.push_back(pr);
                         }
@@ -378,25 +384,45 @@ int main(int argc, char* argv[]) {
 
         // update (and remove) projectiles
         // ignore on-field barriers, only test out-of-bounds
-        if((frame_count & 0L)) {
-            for(auto iter = fr_list.begin(); iter != fr_list.end(); iter++) {
+        if((frame_count & 1L)) {
+            auto iter = fr_list.begin();
+            while(iter != fr_list.end()) {
                 auto& e = *iter;
+                bool iter_collides = false;
                 for(int i = 8; i < 12; i++) {
-                    if(e.collides(r1[i]))
-                        iter = fr_list.erase(iter);
+                    if(e.collides(r1[i])) {
+                        iter_collides = true;
+                        break;
+                    }
                 }
+
+                if(iter_collides) {
+                    iter = fr_list.erase(iter);
+                } else {
+                    iter++;
+                }
+
             }
         }
 
         // every 2 frames, test barrier collision
         if(!(frame_count & 1L)) {
-            for(auto iter = fr_list.begin(); iter != fr_list.end(); iter++) {
+            //for(auto iter = fr_list.begin(); iter != fr_list.end();) {
+            auto iter = fr_list.begin();
+            while(iter != fr_list.end()) {
                 auto& e = *iter;
+                bool iter_collides = false;
                 for(int i = 0; i < 4; i++) {
                     if(e.collides(r1[i])) {
-                        iter = fr_list.erase(iter);
+                        iter_collides = true;
                         break;
                     }
+                }
+
+                if(iter_collides) {
+                    iter = fr_list.erase(iter);
+                } else {
+                    iter++;
                 }
             }
         }

@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
         {255, 255, 255, 255}
     };
 
-    //b2Vec2 gravity(0.0f, 98.1f);
-    b2Vec2 gravity(0.0f, 0.0f);
+    b2Vec2 gravity(0.0f, 98.1f);
+    //b2Vec2 gravity(0.0f, 0.0f);
     b2World world(gravity);
 
     b2BodyDef groundBodyDef;
@@ -70,7 +70,8 @@ int main(int argc, char* argv[]) {
     vector<RGB_B2Body> body_ptr_vec;
     vector<RGB_B2Body> body_circle_vec;
 
-    //for(int i = 0; i < 300; i++) {
+    auto main_loop_start_time = SDL_GetTicks();
+
     bool quit = false;
     bool mouse_used = false;
     float mouse_x, mouse_y;
@@ -91,37 +92,53 @@ int main(int argc, char* argv[]) {
             float mapped_x = map(mouse_x, 0.0f, (float)surface->w, 0.0f, FloatRect::screen_width);
             float mapped_y = map(mouse_y, 0.0f, (float)surface->h, 0.0f, FloatRect::screen_height);
 
-            b2BodyDef bodyDef;
-            bodyDef.type = b2_dynamicBody;
-            bodyDef.position.Set(mapped_x, mapped_y);
+            // ===============================
+            // generate a square body
+            // ===============================
 
-            b2Body* body = world.CreateBody(&bodyDef);
+            {
+            
+                b2BodyDef bodyDef;
+                bodyDef.type = b2_dynamicBody;
+                bodyDef.position.Set(mapped_x, mapped_y);
 
-            b2FixtureDef fixtureDef;
-            fixtureDef.shape = &dynamicBox;
-            fixtureDef.density = 1.0f;
-            fixtureDef.friction = 0.3f;
+                b2Body* body = world.CreateBody(&bodyDef);
 
-            body->CreateFixture(&fixtureDef);
-            //body->SetAngularVelocity(3.0f*M_PI);
-            body_ptr_vec.push_back({body, rgb_arr[rand() % 6], SDL_GetTicks()});
+                b2FixtureDef fixtureDef;
+                fixtureDef.shape = &dynamicBox;
+                fixtureDef.density = 0.1f;
+                fixtureDef.friction = 10.0f;
+
+                body->CreateFixture(&fixtureDef);
+                //body->SetAngularVelocity(3.0f*M_PI);
+                body_ptr_vec.push_back({body, rgb_arr[rand() % 6], SDL_GetTicks()});
+
+            }
 
             // ================================
             // generate a circle body
+            // ================================
 
-            bodyDef.type = b2_dynamicBody;
-            bodyDef.position.Set(mapped_x, mapped_y);
+            {
+                b2BodyDef bodyDef;
+                bodyDef.type = b2_dynamicBody;
+                bodyDef.position.Set(mapped_x, mapped_y);
 
-            body = world.CreateBody(&bodyDef);
+                b2Body* body = world.CreateBody(&bodyDef);
 
-            b2CircleShape circleshape;
-            circleshape.m_p.Set(0.0f, 0.0f);
-            circleshape.m_radius = 1.0f;
+                b2CircleShape circleshape;
+                circleshape.m_p.Set(0.0f, 0.0f);
+                circleshape.m_radius = 1.0f;
 
-            fixtureDef.shape = &circleshape;
-            
-            body->CreateFixture(&fixtureDef);
-            body_circle_vec.push_back({body, rgb_arr[rand() % 6], SDL_GetTicks()});
+                b2FixtureDef fixtureDef;
+                fixtureDef.shape = &circleshape;
+                fixtureDef.density = 1.0f;
+                fixtureDef.friction = 0.3f;
+
+                body->CreateFixture(&fixtureDef);
+                body_circle_vec.push_back({body, rgb_arr[rand() % 6], SDL_GetTicks()});
+
+            }
 
             mouse_used = false;
         }
@@ -160,7 +177,7 @@ int main(int argc, char* argv[]) {
         auto current_time = SDL_GetTicks();
         for(auto iter = body_ptr_vec.begin(); iter != body_ptr_vec.end();) {
             RGB_B2Body& b = *iter;
-            if(current_time - b.start_time > 20000) { // 5 seconds
+            if(current_time - b.start_time > 20000) { // 20 seconds
                 world.DestroyBody(b.body);
                 iter = body_ptr_vec.erase(iter);
             } else {
