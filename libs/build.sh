@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # pretty text awaits
-RED=`tput setaf 1`
-GRN=`tput setaf 2`
-YEL=`tput setaf 3`
-MAG=`tput setaf 5`
-CYN=`tput setaf 6`
-RST=`tput sgr0`
+RED=`tput setaf 1` # red
+GRN=`tput setaf 2` # green
+YEL=`tput setaf 3` # yellow
+MAG=`tput setaf 5` # magenta
+CYN=`tput setaf 6` # cyan
+RST=`tput sgr0`    # default
 
 print_command_line_opts()
 {
@@ -34,6 +34,9 @@ then
     # list of files that need to be compiled into object code
     LINK_FILES=( "Animation" "FloatRect" "HitBox" "MineExplosion" \
     "Polygon" "Projectile" "TextTag" "LevelLoader" )
+
+    # libraries needed to connect to combat-clone server
+    LINK_FILES+=( "tcp/Packet" "tcp/Client" )
 
     for i in "${LINK_FILES[@]}" # iterate through the files
     do
