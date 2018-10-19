@@ -38,6 +38,9 @@ then
     # libraries needed to connect to combat-clone server
     LINK_FILES+=( "tcp/Packet" "tcp/Client" )
 
+    # libraries for lua interfacing
+    LINK_FILES+=( "lua/LuaInterface" )
+
     for i in "${LINK_FILES[@]}" # iterate through the files
     do
         echo "${CYN}    src/$i.cpp"
@@ -67,7 +70,9 @@ then
     echo "${YEL}  Cleaning up the workspace..."
 
     # remove everything in bin/ and obj/
-    rm -rf obj/*
+    rm -rf obj/*.o
+    rm -rf obj/tcp/*.o
+    rm -rf obj/lua/*.o
 
 fi 
 

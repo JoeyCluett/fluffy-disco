@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
         Packet packet;
         packet.Read(fd);
 
-        // chain together multiple reads
+        // chain together multiple reads (including an array!)
         packet >> ARR(INTEGER_P, 3, i_arr) >> hw;
 
         cout << "Client sends: ";
