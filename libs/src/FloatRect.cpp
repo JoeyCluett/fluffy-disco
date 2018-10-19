@@ -63,8 +63,16 @@ void FloatRect::drawOutline(SDL_Surface* surface, uint8_t r, uint8_t g, uint8_t 
     rectangleRGBA(surface, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h, r, g, b, 255);
 }
 
-FloatRect& FloatRect::operator+=(TwoDimensionalPoint& tdp) {
+FloatRect& FloatRect::operator+=(TwoDimensionalPoint tdp) {
     this->x += tdp.x;
     this->y += tdp.y;
+    return *this;
+}
+
+FloatRect& FloatRect::operator*=(TwoDimensionalPoint tdp) {
+    this->x *= tdp.x;
+    this->w *= tdp.x;
+    this->y *= tdp.y;
+    this->h *= tdp.y;
     return *this;
 }

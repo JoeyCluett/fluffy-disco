@@ -30,7 +30,9 @@ public:
     virtual void draw(SDL_Surface* surface, int color);
     virtual void drawOutline(SDL_Surface* surface, uint8_t r, uint8_t g, uint8_t b);
 
-    FloatRect& operator+=(TwoDimensionalPoint& tdp);
+    FloatRect& operator+=(TwoDimensionalPoint tdp);
+
+    FloatRect& operator*=(TwoDimensionalPoint tdp);
 
     FloatRect translate(float x, float y) const {
         return FloatRect(this->x + x, this->y + y, this->h, this->w);
