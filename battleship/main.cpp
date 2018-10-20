@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int main(int argc, char* agrv[]) {
+int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_ShowCursor(SDL_DISABLE);
 
@@ -71,8 +71,11 @@ int main(int argc, char* agrv[]) {
 
     // scale down the float rect so it fits in the 1.0 x 1.0 screen space
     for(int i = 0; i < large_ship_size; i++) {
-        large_ship[i] *= _2DPt{0.125f, 0.125f};
-        large_ship[i] +=  _2DPt{0.4f, 0.4f};
+        large_ship[i] *= _2DPt{0.25f, 0.25f};
+        large_ship[i] +=  _2DPt{-0.125f, -0.5f};
+
+        // shift to center of screen
+        large_ship[i] += _2DPt{0.5f, 0.5f};
     }
 
     bool quit = false;
