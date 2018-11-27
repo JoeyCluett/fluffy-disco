@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 
     // scale down the float rect so it fits in the 1.0 x 1.0 screen space
     for(int i = 0; i < large_ship_size; i++) {
-        large_ship[i] *= _2DPt{0.25f, 0.25f};
+        large_ship[i] *= _2DPt{0.125f, 0.125f};
         large_ship[i] +=  _2DPt{-0.125f, -0.5f};
 
         // shift to center of screen

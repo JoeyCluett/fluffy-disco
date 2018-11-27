@@ -20,7 +20,7 @@ private:
 public:
     // does a given point collide with this 
     // ship (this is battleship, after all)?
-    virtual bool pointCollides(float x, float y) = 0;
+    virtual bool collides(float x, float y) = 0;
 
     void draw(SDL_Surface* surface) {
         int s = __fr_vec.size();

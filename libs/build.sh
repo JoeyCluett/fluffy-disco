@@ -33,7 +33,7 @@ then
 
     # list of files that need to be compiled into object code
     LINK_FILES=( "Animation" "FloatRect" "HitBox" "MineExplosion" \
-    "Polygon" "Projectile" "TextTag" "LevelLoader" )
+    "Polygon" "Projectile" "TextTag" "LevelLoader" "FloatLine" )
 
     # libraries needed to connect to combat-clone server
     LINK_FILES+=( "tcp/Packet" "tcp/Client" )

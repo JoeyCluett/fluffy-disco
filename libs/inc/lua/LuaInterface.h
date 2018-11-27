@@ -10,6 +10,7 @@ extern "C" {
     #include <lua5.1/lualib.h>
 }
 
+// convenience defines for the getGlobal method
 #define LI_NUMBER_TYPE   double,LUA_TNUMBER,lua_tonumber
 #define LI_BOOLEAN_TYPE  int,LUA_TBOOLEAN,lua_toboolean
 #define LI_STRING_TYPE   const char*,LUA_TSTRING,INTERNAL_LUA_TO_STRING

@@ -12,10 +12,13 @@
 #include <inc/HitBox.h>
 #include <inc/Projectile.h>
 #include <inc/TextTag.h>
+#include <inc/FloatLine.h>
 
 // animation shiz
 #include <inc/Animation.h>
 #include <inc/MineExplosion.h>
+
+#include "main.h"
 
 using namespace std;
 
@@ -143,8 +146,9 @@ int main(int argc, char* argv[]) {
     const int WEAPON_remote = 4;
     int current_weapon_state = WEAPON_mg;
 
-    const char* weapon_name_mg   = "Machine Gun";
-    const char* weapon_name_shot = "Shotgun    ";
+    const char* weapon_name_mg     = "Machine Gun";
+    const char* weapon_name_shot   = "Shotgun    ";
+    const char* weapon_name_sniper = "Sniper     ";
 
     float fire_meter = 1.0f;
     FloatRect fire_indicator{0.0f, 1.0f, 0.025f, 1.0f};
@@ -185,18 +189,12 @@ int main(int argc, char* argv[]) {
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_KEYDOWN) {
                 switch(e.key.keysym.sym) {
-                    case SDLK_LEFT:
-                        turn_left = true; break;
-                    case SDLK_RIGHT:
-                        turn_right = true; break;
-                    case SDLK_ESCAPE:
-                        quit = true; break;
-                    case SDLK_h:
-                        show_hitboxes = !show_hitboxes; break;
-                    case SDLK_UP:
-                        go_forward = true; break;
-                    case SDLK_DOWN:
-                        go_backward = true; break;
+                    case SDLK_LEFT:   turn_left = true; break;
+                    case SDLK_RIGHT:  turn_right = true; break;
+                    case SDLK_ESCAPE: quit = true; break;
+                    case SDLK_h:      show_hitboxes = !show_hitboxes; break;
+                    case SDLK_UP:     go_forward = true; break;
+                    case SDLK_DOWN:   go_backward = true; break;
                     case SDLK_g:
                         switch(current_weapon_state) {
                             case WEAPON_mg:
@@ -210,29 +208,19 @@ int main(int argc, char* argv[]) {
                         }
                         break;
 
-                    case SDLK_s:
-                        shield = !shield;
-                        break;
-
-                    case SDLK_d:
-                        drop_mine = true; break;
-
+                    case SDLK_s: shield = !shield; break;
+                    case SDLK_d: drop_mine = true; break;
                     case SDLK_SPACE:
-                    case SDLK_f:
-                        fire = true; break;
+                    case SDLK_f: fire = true; break;
                     default:
                         break;
                 }
             } else if(e.type == SDL_KEYUP) {
                 switch(e.key.keysym.sym) {
-                    case SDLK_LEFT:
-                        turn_left = false; break;
-                    case SDLK_RIGHT:
-                        turn_right = false; break;
-                    case SDLK_UP:
-                        go_forward  = false; break;
-                    case SDLK_DOWN:
-                        go_backward = false; break;
+                    case SDLK_LEFT:  turn_left = false; break;
+                    case SDLK_RIGHT: turn_right = false; break;
+                    case SDLK_UP:    go_forward  = false; break;
+                    case SDLK_DOWN:  go_backward = false; break;
                     default:
                         break;
                 }
@@ -276,7 +264,6 @@ int main(int argc, char* argv[]) {
             r1[i].draw(surface, BLACK);
     
         std::vector<HitBox> tf_hitboxes;
-
         for(auto& hb : hbs) {
             HitBox tmp = hb.rotate(tmp_rads - (M_PI/2.0));
             tmp += {tmp_player_x_pos, tmp_player_y_pos};
@@ -437,6 +424,20 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        const FloatRect sniper_indicator{-0.005f, -0.005f, 0.01f, 0.01f};
+        auto pt = sniper_target(rads, player_x_pos, player_y_pos, r1);
+        auto t = sniper_indicator.translate(pt.x, pt.y);
+        FloatLine fline{player_x_pos, t.x, player_y_pos, t.y};
+        fline.draw(surface, 0, 0, 255);
+        t.draw(surface, RED);
+
+        //for(auto& pt : M_sniper_round_targets) {
+            //auto t = sniper_indicator.translate(pt.x, pt.y);
+            //FloatLine fline{player_x_pos, t.x, player_y_pos, t.y};
+            //fline.draw(surface, 0, 0, 255);
+            //t.draw(surface, BLUE);
+        //}
+
         status_bars_background.draw(surface, BLACK);
         right_side_background.draw(surface, BLACK);
 
@@ -449,6 +450,8 @@ int main(int argc, char* argv[]) {
                 fire_label.text = "Rifle  "; break;
             case WEAPON_shotty:
                 fire_label.text = "Shotgun"; break;
+            case WEAPON_sniper:
+                fire_label.text = "Sniper "; break;
             default:
                 fire_label.text = "UNKNOWN";
                 break;
