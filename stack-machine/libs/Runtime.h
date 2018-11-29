@@ -10,7 +10,7 @@
 
 using namespace Instruction;
 
-#define NUM_REGISTERS 4
+#define NUM_REGISTERS 8
 
 class Runtime {
 private:

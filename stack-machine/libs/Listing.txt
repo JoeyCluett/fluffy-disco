@@ -1,0 +1,26 @@
+pushlit ##          -- push a literal value onto the stack
+push1               -- push a literal 1 onto the stack
+push0               -- push a literal 0 onto the stack
+
+-- math operations always operate on the two values 
+-- on top of the stack, operands are always implicit
+add
+sub
+mul
+div
+
+ptop                -- print the top value of the stack to the console
+call ##             -- call a local or exported subroutine
+pushr ##            -- push a specific register onto the stack
+popr ##             -- pop the top of the stack into a register
+bzero ##            -- branch to location if top of stack is zero
+bnzero ##           -- branch to location if top of stack is not zero
+ret                 -- address on top of stack is placed in program counter
+loads               -- load an element from the stack, uses an index from the top 
+                        of the stack. i.e. 'loads 0' loads the most recently 
+                        pushed item and 'loads 1' loads the second most recently 
+                        used item. this does not remove the item from the stack
+                        the loaded element is placed in register0
+stores              -- does the reverse of 'loads': register0 is placed somewhere in the stack
+movr                -- move a register value to another register
+
