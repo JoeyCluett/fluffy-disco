@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <map>
 
 namespace Instruction {
 
@@ -22,32 +23,19 @@ namespace Instruction {
     const int loads       = 14;
     const int stores      = 15;
     const int movr        = 16;
+    const int halt        = 17;
 
-    const std::vector<const char*> instruction_strings = {
-        "pushlit", "push1", "push0", "add", "sub", "mul", "div",
-        "ptop", "call", "pushr", "popr", "bzero", "bnzero", "ret",
-        "loads", "stores", "movr"
+    const std::map<std::string, const int> instruction_strings = {
+        {"pushlit", pushLiteral}, {"push1", push_1}, {"push0", push_0},
+        {"add", add}, {"sub", subtract}, {"mul", multiply}, {"div", divide},
+        {"ptop", printTop}, {"call", call}, {"pushr", pushRegister}, {"popr", popRegister},
+        {"bzero", branchZero}, {"bnzero", branchNZero}, {"ret", ret}, {"loads", loads},
+        {"stores", stores}, {"movr", movr}, {"halt", halt}
     };
 
     int isInstruction(std::string str) {
-        for(int i = 0; i < instruction_strings.size(); i++) {
-            if(str == instruction_strings.at(i))
-                return i;
-        }
-        throw std::runtime_error("Unknown instruction token: " + str);
-    }
-
-    bool isInstruction(int op) {
-        switch(op) {
-            case pushLiteral: case push_1: case push_0:
-            case add: case subtract: case multiply:
-            case divide: case printTop: case call:
-            case pushRegister: case popRegister:
-            case branchZero: case branchNZero: case ret:
-                return true;
-            default:
-                return false;
-        }
+        auto ret = instruction_strings.find(str);
+        return -1;
     }
 
 } // end of namespace Instruction

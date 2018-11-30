@@ -24,3 +24,4 @@ loads               -- load an element from the stack, uses an index from the to
 stores              -- does the reverse of 'loads': register0 is placed somewhere in the stack
 movr                -- move a register value to another register
 
+halt                -- prevents the runtime from executing anymore instructions

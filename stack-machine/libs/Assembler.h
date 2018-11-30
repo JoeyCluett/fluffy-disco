@@ -7,18 +7,21 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 class Assembler {
 private:
-    std::vector<std::string> token_stream;
-    std::vector<int> program_tokens;
 
-    std::map<std::string, int> jump_lut;
+    std::map<int, std::string> jump_loc;
+    std::map<std::string, int> jump_name;
 
     void sanitizeTextVector(std::vector<char>& c_vec);
 
 public:
     Assembler(std::string start_file);
+
+
+
 };
 
 Assembler::Assembler(std::string start_file) {

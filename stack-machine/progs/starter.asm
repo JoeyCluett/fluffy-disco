@@ -1,9 +1,12 @@
+call this.main
+halt
 
 # this is how functions get 'exported' to other parts of the system
-uses progs/factorial
+uses factorial
 
-    # we want to know 3!
-    pushlit 3
+label main
+    # we want to know 4(factorial)
+    pushlit 4
     call global.factorial
 
     # should be 6

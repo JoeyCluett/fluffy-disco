@@ -16,6 +16,11 @@ public:
         return os;
     }
 
+    int& getIndex(int index) {
+        auto iter = this->work_stack.end();
+        return *(iter - (1+index));
+    }
+
     int getTop(void) {
         return this->work_stack.back();
     }

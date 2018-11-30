@@ -18,6 +18,8 @@ private:
     int registers[NUM_REGISTERS];
     int programCounter = 0;
 
+    bool isHalted = false;
+
 public:
     Runtime(void) {
         for(int i = 0; i < NUM_REGISTERS; i++) {
@@ -32,8 +34,16 @@ public:
         return os;
     }
 
+    void executeProg(std::vector<int>& prog) {
+        while(true)
+            this->executeProg(prog, 1000);
+    }
+
     // assumes one instruction per cycle
     void executeProg(std::vector<int>& prog, int cycles) {
+        if(this->isHalted)
+            return;
+
         for(int i = 0; i < cycles; i++) {
             int inst = prog[programCounter];
 
@@ -71,12 +81,48 @@ public:
                     programCounter++;
                     break;
                 case call:
+                    this->stack.pushLiteral(programCounter + 2);
                     programCounter = prog[programCounter+1];
                     break;
                 case pushRegister:
                     this->stack.pushLiteral(this->registers[prog[programCounter+1]]);
-                    programCounter++;
+                    programCounter += 2;
                     break;
+                case popRegister:
+                    this->registers[prog[programCounter+1]] = this->stack.getTop();
+                    this->stack.popTop();
+                    programCounter += 2;
+                    break;
+                case branchZero:
+                    if(!this->stack.getTop())
+                        programCounter = prog[programCounter + 1];
+                    else
+                        programCounter += 2;
+                    break;
+                case branchNZero:
+                    if(this->stack.getTop())
+                        programCounter = prog[programCounter + 1];
+                    else
+                        programCounter += 2;
+                    break;
+                case ret:
+                    programCounter = this->stack.getTop();
+                    this->stack.popTop();
+                    break;
+                case loads:
+                    this->registers[0] = this->stack.getIndex(prog[programCounter+1]);
+                    programCounter += 2;
+                    break;
+                case stores:
+                    this->stack.getIndex(prog[programCounter+1]) = this->registers[0];
+                    programCounter += 2;
+                    break;
+                case movr:
+                    throw std::runtime_error("'movr' semantics are not supported yet");
+                    break;
+                case halt:
+                    this->isHalted = true;
+                    return; break;
                 default:
                     throw std::runtime_error("Runtime -> unknown instruction");
             }

@@ -2,7 +2,7 @@
 #include <Instructions.h>
 #include <Stack.h>
 #include <Runtime.h>
-#include <assembler/Assembler.h>
+#include <Assembler.h>
 
 using namespace std;
 using namespace Instruction;
