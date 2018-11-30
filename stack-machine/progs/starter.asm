@@ -1,4 +1,4 @@
-call this.main
+call local.main
 halt
 
 # this is how functions get 'exported' to other parts of the system
@@ -11,4 +11,3 @@ label main
 
     # should be 6
     ptop
-    

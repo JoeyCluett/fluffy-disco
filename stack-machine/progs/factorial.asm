@@ -1,5 +1,4 @@
 # recursive factorial subroutine
-
 # 'export' makes this jump destination available in the global jump table
 export factorial
     loads 1
@@ -9,9 +8,9 @@ export factorial
 
     bzero EndFunction
 
-    # 'this.' only looks in this file for the destination and 
+    # 'local.' only looks in this file for the destination and 
     # uses a relative address. this allows for relocatable code
-    call this.factorial
+    relative local.factorial # relative allows for relocatable binaries
 
     # get the next multiplicand off of the stack and multiply
     loads 2

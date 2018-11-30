@@ -21,6 +21,8 @@ namespace SAT {
         if(slope_a == slope_b)
             return false;
     
+        //if(slope_a == )
+
         x = (intercept_b - intercept_a) / (slope_a - slope_b);
         y = slope_a * x + intercept_a;
         return true;

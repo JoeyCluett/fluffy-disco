@@ -16,12 +16,12 @@ popr ##             -- pop the top of the stack into a register
 bzero ##            -- branch to location if top of stack is zero
 bnzero ##           -- branch to location if top of stack is not zero
 ret                 -- address on top of stack is placed in program counter
-loads               -- load an element from the stack, uses an index from the top 
+loads ##            -- load an element from the stack, uses an index from the top 
                         of the stack. i.e. 'loads 0' loads the most recently 
                         pushed item and 'loads 1' loads the second most recently 
                         used item. this does not remove the item from the stack
                         the loaded element is placed in register0
-stores              -- does the reverse of 'loads': register0 is placed somewhere in the stack
+stores ##           -- does the reverse of 'loads': register0 is placed somewhere in the stack
 movr                -- move a register value to another register
-
 halt                -- prevents the runtime from executing anymore instructions
+relative ##         -- value is added to program counter, this allows

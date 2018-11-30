@@ -24,18 +24,24 @@ namespace Instruction {
     const int stores      = 15;
     const int movr        = 16;
     const int halt        = 17;
+    const int relative    = 18;
 
     const std::map<std::string, const int> instruction_strings = {
         {"pushlit", pushLiteral}, {"push1", push_1}, {"push0", push_0},
         {"add", add}, {"sub", subtract}, {"mul", multiply}, {"div", divide},
         {"ptop", printTop}, {"call", call}, {"pushr", pushRegister}, {"popr", popRegister},
         {"bzero", branchZero}, {"bnzero", branchNZero}, {"ret", ret}, {"loads", loads},
-        {"stores", stores}, {"movr", movr}, {"halt", halt}
+        {"stores", stores}, {"movr", movr}, {"halt", halt}, {"relative", relative}
     };
 
-    int isInstruction(std::string str) {
-        auto ret = instruction_strings.find(str);
-        return -1;
+    // convenient way to determine if a given opcode is 
+    const int getInstBinary(std::string opcode) {
+        auto iter = instruction_strings.find(opcode);
+        if(iter != instruction_strings.end()) {
+            return iter->second;
+        } else {
+            return -1;
+        }
     }
 
 } // end of namespace Instruction

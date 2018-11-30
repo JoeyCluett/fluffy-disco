@@ -123,6 +123,9 @@ public:
                 case halt:
                     this->isHalted = true;
                     return; break;
+                case relative:
+                    programCounter += prog[programCounter+1];
+                    break;
                 default:
                     throw std::runtime_error("Runtime -> unknown instruction");
             }
