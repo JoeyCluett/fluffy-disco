@@ -10,7 +10,7 @@ mul
 div
 
 ptop                -- print the top value of the stack to the console
-call ##             -- call a local or exported subroutine
+call ##             -- call a local or global subroutine
 pushr ##            -- push a specific register onto the stack
 popr ##             -- pop the top of the stack into a register
 bzero ##            -- branch to location if top of stack is zero
@@ -24,4 +24,4 @@ loads ##            -- load an element from the stack, uses an index from the to
 stores ##           -- does the reverse of 'loads': register0 is placed somewhere in the stack
 movr                -- move a register value to another register
 halt                -- prevents the runtime from executing anymore instructions
-relative ##         -- value is added to program counter, this allows
+goto ##             -- unconditional jump to location

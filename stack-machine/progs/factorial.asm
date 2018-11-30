@@ -6,11 +6,10 @@ export factorial
     pushlit 1
     sub
 
-    bzero EndFunction
+    bzero local.EndFunction
 
     # 'local.' only looks in this file for the destination and 
-    # uses a relative address. this allows for relocatable code
-    relative local.factorial # relative allows for relocatable binaries
+    call local.factorial
 
     # get the next multiplicand off of the stack and multiply
     loads 2

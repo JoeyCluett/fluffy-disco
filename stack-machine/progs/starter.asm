@@ -5,7 +5,7 @@ halt
 uses factorial
 
 label main
-    # we want to know 4(factorial)
+    # we want to know 4! ("four factorial")
     pushlit 4
     call global.factorial
 
