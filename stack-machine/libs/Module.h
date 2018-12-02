@@ -16,8 +16,38 @@ typedef std::vector<std::string> string_vec_t;
 class Module {
 private:
     // for local branches and jumps
-    std::map<int, std::string> module_index_to_name;
-    std::map<std::string, int> module_name_to_dest;
+    std::map<int, std::string> module_index_to_name; // location to jump from
+    std::map<std::string, int> module_name_to_dest;  // location to jump to
+
+    void place_module_jump_destination(std::string name, int dest) {
+        auto iter = this->module_name_to_dest.find(name);
+        if(iter != this->module_name_to_dest.end()) {
+            throw std::runtime_error("'local." + name + "' already has an entry");
+        } else {
+            this->module_name_to_dest[name] = dest;
+        }
+    }
+
+    void place_module_jump_source(int src, std::string dest) {
+        this->module_index_to_name[src] = dest;
+    }
+
+    void place_global_jump_destination(
+            std::map<std::string, int>& global_name_to_dest, 
+            std::string name, int dest) {
+        auto iter = global_name_to_dest.find(name);
+        if(iter != global_name_to_dest.end()) {
+            throw std::runtime_error("'global." + name + "' already has an entry");
+        } else {
+            global_name_to_dest[name] = dest;
+        }
+    }
+
+    void place_global_jump_source(
+            std::map<int, std::string>& global_index_to_name, 
+            int src, std::string dest) {
+        global_index_to_name[src] = dest;
+    }
 
 public:
     Module(
@@ -28,7 +58,7 @@ public:
 
         int s = prog.size();
         int current_prog_size = inst_vec.size();
-        for(int i = 0; i < s;) {
+        for(int i = 0; i < s; /* FSM advances index */) {
             std::string& str = prog.at(i);
             std::cout << "Current token: " << str << std::endl;
 
@@ -49,18 +79,19 @@ public:
                     i++; break;
                 case call:
                     {
+                        inst_vec.push_back(result);
                         auto p = Instruction::splitByDot(prog.at(i+1));
                         if(p.first == "global") {
-                            global_index_to_name[inst_vec.size()] = p.second;
+                            this->place_global_jump_source(
+                                global_index_to_name, inst_vec.size(), p.second);
                         }
                         else if(p.first == "local") {
-                            module_index_to_name[inst_vec.size()] = p.second;
+                            this->place_module_jump_source(inst_vec.size(), p.second);
                         }
                         else {
                             throw std::runtime_error("call destination " 
                                     + prog.at(i+1) + " is neither 'global' or 'local'");
                         }
-                        inst_vec.push_back(result);
                         inst_vec.push_back(-1); // place holder
                     }
                     i += 2;
@@ -87,7 +118,6 @@ public:
                         }
                         inst_vec.push_back(-1); // place holder
                     }
-                    //inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
                 case ret:
                     inst_vec.push_back(result);
@@ -114,22 +144,12 @@ public:
                     if(str == "export") {
                         // place this label in the global table AND the 'local.' jump table
                         // if it already exists, error. otherwise, place it in the table
-                        auto iter = global_name_to_dest.find(prog.at(i+1));
-                        if(iter != global_name_to_dest.end()) {
-                            // error, kill process
-                            throw std::runtime_error("Entry [global." 
-                                    + prog.at(i+1) + "] already exists in global jump table");
-                        } else {
-                            global_name_to_dest[prog.at(i+1)] = inst_vec.size();
-                        }
+                        std::string s = prog.at(i+1);
+                        this->place_global_jump_destination(
+                                global_name_to_dest, s, inst_vec.size());
 
-                        iter = module_name_to_dest.find(prog.at(i+1));
-                        if(iter != module_name_to_dest.end()) {
-                            throw std::runtime_error("Entry [local."
-                                    + prog.at(i+1) + "] already exists in module jump table");
-                        } else {
-                            module_name_to_dest[prog.at(i+1)] = inst_vec.size();
-                        }
+                        this->place_module_jump_destination(s, inst_vec.size());
+
                         i += 2;
                     }
                     else if(str == "uses") {
@@ -147,14 +167,8 @@ public:
                         i += 2;
                     }
                     else if(str == "label") {
-                        // place this label ONLY in the 'local.' jump table
-                        auto iter = module_name_to_dest.find(prog.at(i+1));
-                        if(iter != module_name_to_dest.end()) {
-                            throw std::runtime_error("Entry [local."
-                                    + prog.at(i+1) + "] already exists in module jump table");
-                        } else {
-                            module_name_to_dest[prog.at(i+1)] = inst_vec.size();
-                        }
+                        // place this label ONLY in the local jump table
+                        this->place_module_jump_destination(prog.at(i+1), inst_vec.size());
                         i += 2;
                     }
                     break;
@@ -164,12 +178,12 @@ public:
         // evaluate local. jumps
         for(auto iter : module_index_to_name) {
             int jump_dest = module_name_to_dest.at(iter.second);
-            inst_vec.at(iter.first + 1) = jump_dest;
+            inst_vec.at(iter.first) = jump_dest;
         }
 
-        std::cout << "Local jump table: \n";
+        /*std::cout << "Local jump table: \n";
         for(auto iter : module_name_to_dest) {
             std::cout << "  " << iter.first << " : " << iter.second << std::endl;
-        }
+        }*/
     }
 };

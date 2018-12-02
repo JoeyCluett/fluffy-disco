@@ -1,6 +1,8 @@
+# ---------------------------------
 # recursive factorial subroutine
-# 'export' makes this jump destination available in the global jump table
-export factorial
+# ---------------------------------
+
+export Factorial
     loads 1
     pushr 0
     pushlit 1
@@ -8,8 +10,8 @@ export factorial
 
     bzero local.EndFunction
 
-    # 'local.' only looks in this file for the destination and 
-    call local.factorial
+    # 'local.' only looks in this file for the destination
+    call local.Factorial
 
     # get the next multiplicand off of the stack and multiply
     loads 2

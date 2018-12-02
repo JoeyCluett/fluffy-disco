@@ -1,13 +1,12 @@
+# this is where programs start
 call local.main
 halt
 
-# this is how functions get 'exported' to other parts of the system
-uses factorial
+uses standardmath
 
 label main
-    # we want to know 4! ("four factorial")
-    pushlit 4
-    call global.factorial
-
-    # should be 6
+    pushlit 2
+    pushlit 3
+    call global.Power
     ptop
+    ret
