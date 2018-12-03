@@ -128,6 +128,9 @@ public:
                 case relative:
                     programCounter += prog[PC+1];
                     break;
+                case _goto:
+                    programCounter = prog[PC+1];
+                    break;
                 default:
                     throw std::runtime_error("Runtime -> unknown instruction: " + std::to_string(inst));
             }

@@ -1,9 +1,10 @@
 # --------------------------------------
 # pretty standard math operations 
-# not supported in the instruction set
+# not directly supported in the 
+# instruction set
 # --------------------------------------
 
-export Square
+export Square # <base> <return address>
     popr 0
     popr 1
     pushr 1
@@ -12,7 +13,7 @@ export Square
     pushr 0
     ret
 
-export Cube
+export Cube # <base> <return address>
     popr 0
     popr 1
     pushr 1
@@ -23,26 +24,53 @@ export Cube
     pushr 0
     ret
 
-export Power
+export Power # <base> <exponent> <return address>
     popr 0 # return address
-    bnzero local.full_function
-
-    # exponent is zero, return one
-    popr 1
-    popr 1
-    push1
-    pushr 0
-    ret
-
-label full_function
     popr 1 # exponent
     popr 2 # base
+    
+    # test for exponent zero
+    pushr 1
+    bnzero local.prep
 
-    # get the ball rolling
+    # dont need the tested value anymore
+    popr 1
+
+    # exponent is zero, return 1
+    popr 1
+    pushlit 1
+    pushr 0
+    ret
+
+label prep
+
+    # store the tested exponent again
+    popr 1
+
+    # need to pre-decrement the exponent
+    pushr 1
+    push1
+    sub
+    popr 1
+
     pushr 2
 
+label loop_start
     pushr 2
     mul
 
-    # decrement the exponent
+    pushr 1
+    push1
+    sub
+    popr 1
+    pushr 1
+
+    bzero local.loop_end
+    popr 1
+    goto local.loop_start
+
+label loop_end
+    popr 1
+    pushr 0
+    ret
     

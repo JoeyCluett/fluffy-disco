@@ -13,6 +13,8 @@
 
 typedef std::vector<std::string> string_vec_t;
 
+using namespace Instruction;
+
 class Module {
 private:
     // for local branches and jumps
@@ -136,7 +138,21 @@ public:
                 case relative:
                 case _goto:
                     inst_vec.push_back(result);
-                    inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    {
+                        auto p = Instruction::splitByDot(prog.at(i+1));
+                        if(p.first == "global") {
+                            global_index_to_name[inst_vec.size()] = p.second;
+                        }
+                        else if(p.first == "local") {
+                            module_index_to_name[inst_vec.size()] = p.second;
+                        }
+                        else {
+                            throw std::runtime_error("branch destination " 
+                                    + prog.at(i+1) + " is neither 'global' or 'local'");
+                        }
+                        inst_vec.push_back(-1); // place holder
+                    }
+                    //inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
                 default:
                     // result == -1
