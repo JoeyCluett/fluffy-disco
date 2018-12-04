@@ -21,7 +21,12 @@ int main(int argc, char* argv[]) {
 
     if(strcmp(argv[2], "run") == 0) {
         Runtime rt;
-        rt.executeProg(prog);
+        try {
+            rt.executeProg(prog);
+        } catch(std::runtime_error& up) {
+            cout << "\n\n\n== system state ==\n\n";
+            cout << rt << endl;;
+        }
     }
     else if(strcmp(argv[2], "step") == 0) {
         Runtime rt;

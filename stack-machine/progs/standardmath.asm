@@ -37,7 +37,6 @@ export Power # <base> <exponent> <return address>
     popr 1
 
     # exponent is zero, return 1
-    popr 1
     pushlit 1
     pushr 0
     ret
