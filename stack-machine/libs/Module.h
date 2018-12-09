@@ -15,6 +15,13 @@ typedef std::vector<std::string> string_vec_t;
 
 using namespace Instruction;
 
+static void push_literal_to_instruction_vec(std::vector<u_int8_t>& vec, int lit) {
+    vec.push_back(lit & 255);
+    vec.push_back((lit >> 8) & 255);
+    vec.push_back((lit >> 16) & 255);
+    vec.push_back((lit >> 24) & 255);
+}
+
 class Module {
 private:
     // for local branches and jumps
@@ -56,7 +63,7 @@ public:
             string_vec_t& prog, // string vec containing all of the 
             std::map<std::string, int>& global_name_to_dest,
             std::map<int, std::string>& global_index_to_name,
-            std::vector<int>& inst_vec) {
+            std::vector<u_int8_t>& inst_vec) {
 
         int s = prog.size();
         int current_prog_size = inst_vec.size();
@@ -68,7 +75,8 @@ public:
             switch(result) {
                 case pushLiteral:
                     inst_vec.push_back(result);
-                    inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
+                    //inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
                 case push_1:
                 case push_0:
@@ -94,13 +102,15 @@ public:
                             throw std::runtime_error("call destination " 
                                     + prog.at(i+1) + " is neither 'global' or 'local'");
                         }
-                        inst_vec.push_back(-1); // place holder
+                        push_literal_to_instruction_vec(inst_vec, -1);
+                        //inst_vec.push_back(-1); // place holder
                     }
                     i += 2;
                     break;
                 case pushRegister:
                 case popRegister:
                     inst_vec.push_back(result);
+                    //push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
                     inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
                 case branchZero: // branch if top of stack is zero
@@ -118,7 +128,8 @@ public:
                             throw std::runtime_error("branch destination " 
                                     + prog.at(i+1) + " is neither 'global' or 'local'");
                         }
-                        inst_vec.push_back(-1); // place holder
+                        push_literal_to_instruction_vec(inst_vec, -1);
+                        //inst_vec.push_back(-1); // place holder
                     }
                     i += 2; break;
                 case ret:
@@ -127,15 +138,18 @@ public:
                 case loads:
                 case stores:
                     inst_vec.push_back(result);
-                    inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
+                    //inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
                 case movr:
-                    throw std::runtime_error("Module -> movr semantics not supported yet");
+                    inst_vec.push_back(result);
+                    inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    inst_vec.push_back(std::stoi(prog.at(i+2)));
+                    i += 3;
                     break;
                 case halt:
                     inst_vec.push_back(result);
                     i++; break;
-                case relative:
                 case _goto:
                     inst_vec.push_back(result);
                     {
@@ -150,10 +164,14 @@ public:
                             throw std::runtime_error("branch destination " 
                                     + prog.at(i+1) + " is neither 'global' or 'local'");
                         }
-                        inst_vec.push_back(-1); // place holder
+                        push_literal_to_instruction_vec(inst_vec, -1);
+                        //inst_vec.push_back(-1); // place holder
                     }
                     //inst_vec.push_back(std::stoi(prog.at(i+1)));
                     i += 2; break;
+                case stamp:
+                    inst_vec.push_back(result);
+                    i++; break;
                 default:
                     // result == -1
                     // this is all keywords that are not instructions
@@ -194,7 +212,10 @@ public:
         // evaluate local. jumps
         for(auto iter : module_index_to_name) {
             int jump_dest = module_name_to_dest.at(iter.second);
-            inst_vec.at(iter.first) = jump_dest;
+            
+            int* i_ptr = (int*)&inst_vec[iter.first];
+            *i_ptr = jump_dest;
+            //inst_vec.at(iter.first) = jump_dest;
         }
 
         /*std::cout << "Local jump table: \n";

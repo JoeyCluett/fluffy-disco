@@ -11,35 +11,34 @@
 
 namespace Instruction {
 
-    const int pushLiteral = 0;
-    const int push_1      = 1;
-    const int push_0      = 2;
-    const int add         = 3;
-    const int subtract    = 4;
-    const int multiply    = 5;
-    const int divide      = 6;
-    const int printTop    = 7;
-    const int call        = 8;
-    const int pushRegister = 9;
-    const int popRegister = 10;
-    const int branchZero  = 11; // branch if top of stack is zero
-    const int branchNZero = 12; // branch if top of stack is not zero
-    const int ret         = 13;
-    const int loads       = 14;
-    const int stores      = 15;
-    const int movr        = 16;
-    const int halt        = 17;
-    const int relative    = 18; // goto relative
-    const int _goto       = 19;
-    const int callrel     = 20; // call relative
+    const u_int8_t pushLiteral = 0;
+    const u_int8_t push_1      = 1;
+    const u_int8_t push_0      = 2;
+    const u_int8_t add         = 3;
+    const u_int8_t subtract    = 4;
+    const u_int8_t multiply    = 5;
+    const u_int8_t divide      = 6;
+    const u_int8_t printTop    = 7;
+    const u_int8_t call        = 8;
+    const u_int8_t pushRegister = 9;
+    const u_int8_t popRegister = 10;
+    const u_int8_t branchZero  = 11; // branch if top of stack is zero
+    const u_int8_t branchNZero = 12; // branch if top of stack is not zero
+    const u_int8_t ret         = 13;
+    const u_int8_t loads       = 14;
+    const u_int8_t stores      = 15;
+    const u_int8_t movr        = 16;
+    const u_int8_t halt        = 17;
+    const u_int8_t _goto       = 18;
+    const u_int8_t stamp       = 19;
 
-    const std::map<std::string, const int> instruction_strings = {
+    const std::map<std::string, const u_int8_t> instruction_strings = {
         {"pushlit", pushLiteral}, {"push1", push_1}, {"push0", push_0},
         {"add", add}, {"sub", subtract}, {"mul", multiply}, {"div", divide},
         {"ptop", printTop}, {"call", call}, {"pushr", pushRegister}, {"popr", popRegister},
         {"bzero", branchZero}, {"bnzero", branchNZero}, {"ret", ret}, {"loads", loads},
-        {"stores", stores}, {"movr", movr}, {"halt", halt}, {"grel", relative},
-        {"goto", _goto}, {"crel", callrel}
+        {"stores", stores}, {"movr", movr}, {"halt", halt}, {"goto", _goto},
+        {"stamp", stamp}
     };
 
     // convenient way to determine if a given opcode is supported
@@ -52,7 +51,7 @@ namespace Instruction {
         }
     }
 
-const char* printOpcode(int opcode) {
+    const char* printOpcode(u_int8_t opcode) {
         switch(opcode) {
             case pushLiteral:
                 return "push literal"; break;
@@ -87,15 +86,13 @@ const char* printOpcode(int opcode) {
             case stores:
                 return "store stack"; break;
             case movr:
-                return "move register [NOT SUPPORTED]"; break;
+                return "move register"; break;
             case halt:
                 return "halt"; break;
-            case relative: // goto relative
-                return "goto relative"; break;
             case _goto:
-                return "goto global"; break;
-            case callrel: // call relative
-                return "call relative"; break;
+                return "goto"; break;
+            case stamp:
+                return "timestamp"; break;
             default:
                 return "UNKNOWN OPCODE"; break;
         }
@@ -171,16 +168,16 @@ const char* printOpcode(int opcode) {
         return {a, b};
     }
 
-    void dasm(std::vector<int>& prog) {
+    void dasm(std::vector<u_int8_t>& prog) {
         std::cout << "\n\nDisassembly:\n";
 
         for(int i  = 0; i < prog.size();) {
-            int opcode = prog.at(i);
-            std::cout << "[" << i << "]: (" << opcode << ") ";
+            u_int8_t opcode = prog.at(i);
+            std::cout << "[" << i << "]: (" << (int)opcode << ") ";
             switch(opcode) {
                 case pushLiteral:
-                    std::cout <<  "push literal " << prog.at(i+1) << std::endl; 
-                    i += 2; break;
+                    std::cout <<  "push literal " << *(int*)&prog.at(i+1) << std::endl; 
+                    i += 5; break;
                 case push_1:
                     std::cout << "push one\n"; 
                     i++; break;
@@ -203,44 +200,42 @@ const char* printOpcode(int opcode) {
                     std::cout << "print top\n"; 
                     i++; break;
                 case call:
-                    std::cout << "call " << prog.at(i+1) << std::endl; 
-                    i += 2; break;
+                    std::cout << "call " << *(int*)&prog.at(i+1) << std::endl; 
+                    i += 5; break;
                 case pushRegister:
-                    std::cout << "push register " << prog.at(i+1) << "\n"; 
+                    std::cout << "push register " << (int)prog.at(i+1) << "\n"; 
                     i += 2; break;
                 case popRegister:
-                    std::cout << "pop register " << prog.at(i+1) << "\n"; 
+                    std::cout << "pop register " << (int)prog.at(i+1) << "\n"; 
                     i += 2; break;
                 case branchZero: // branch if top of stack is zero
-                    std::cout <<  "branch if zero " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
+                    std::cout <<  "branch if zero " << *(int*)&prog.at(i+1) << "\n"; 
+                    i += 5; break;
                 case branchNZero: // branch if top of stack is not zero
-                    std::cout <<  "branch if not zero " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
+                    std::cout <<  "branch if not zero " << *(int*)&prog.at(i+1) << "\n"; 
+                    i += 5; break;
                 case ret:
                     std::cout << "return\n"; 
                     i++; break;
                 case loads:
-                    std::cout << "load stack " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
+                    std::cout << "load stack " << *(int*)&prog.at(i+1) << "\n"; 
+                    i += 5; break;
                 case stores:
-                    std::cout << "store stack " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
+                    std::cout << "store stack " << *(int*)&prog.at(i+1) << "\n"; 
+                    i += 5; break;
                 case movr:
-                    std::cout << "move register [NOT SUPPORTED]\n"; 
-                    i++; break;
+                    std::cout << "move register " << (int)prog.at(i+1) 
+                        << ' ' << (int)prog.at(i+2) << "\n"; 
+                    i += 3; break;
                 case halt:
                     std::cout << "halt\n"; 
                     i++; break;
-                case relative: // goto relative
-                    std::cout << "goto relative " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
                 case _goto:
-                    std::cout << "goto global " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
-                case callrel: // call relative
-                    std::cout << "call relative " << prog.at(i+1) << "\n"; 
-                    i += 2; break;
+                    std::cout << "goto global " << *(int*)&prog.at(i+1) << "\n"; 
+                    i += 5; break;
+                case stamp:
+                    std::cout << "timestamp\n";
+                    i++; break;
                 default:
                     throw std::runtime_error("DASM: unknown opcode"); break;
             }

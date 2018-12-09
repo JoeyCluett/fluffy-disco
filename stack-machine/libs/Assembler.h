@@ -17,12 +17,12 @@ private:
     // track jump locations until ready for final assembly
     std::map<int, std::string> global_index_to_name;
     std::map<std::string, int> global_name_to_dest;
-    std::vector<int> final_binary;
+    std::vector<u_int8_t> final_binary;
 
 public:
     Assembler(std::string start_file);
 
-    std::vector<int>& getBinary(void) {
+    std::vector<u_int8_t>& getBinary(void) {
         return this->final_binary;
     }
 
@@ -43,7 +43,11 @@ Assembler::Assembler(std::string start_file) {
     // evaluate global jumps
     for(auto iter : global_index_to_name) {
         int jump_dest = global_name_to_dest.at(iter.second);
-        final_binary.at(iter.first) = jump_dest;
+        //final_binary.at(iter.first) = jump_dest;
+
+        int* i_ptr = (int*)&final_binary[iter.first];
+        *i_ptr = jump_dest;
+
     }
 
     std::cout << "Global jump table entries: \n";

@@ -1,9 +1,8 @@
 # ---------------------------------
 # recursive factorial subroutine
 # ---------------------------------
-
-export Factorial
-    loads 1
+export Factorial # <number> <return address>
+    loads 1 # number
     pushr 0
     pushlit 1
     sub
@@ -28,3 +27,38 @@ label EndFunction
     # remove the zero and return
     popr 0
     ret
+
+# ----------------------------------
+# iterative factorial subroutine
+# ----------------------------------
+export FactorialIterative # <number> <return address>
+    popr 0 # return address
+    bnzero local.start_iterative
+
+    # zero factorial is just zero
+    pushr 0
+    ret
+
+label start_iterative
+    popr 1
+    pushr 1 # copy <number> into register 1
+
+label iterative_loop
+    # decrement <number> and multiply
+    pushr 1
+    pushlit 1
+    sub
+
+    # save new value of <number>
+    popr 1
+    pushr 1
+
+    # multiply through
+    mul
+    
+    pushr 1
+    
+
+    halt
+
+label iterative_end

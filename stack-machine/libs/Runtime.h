@@ -8,6 +8,9 @@
 #include <stdexcept>
 #include <iostream>
 
+// needed to get timestamps
+#include <sys/time.h>
+
 using namespace Instruction;
 
 #define NUM_REGISTERS 8
@@ -32,13 +35,13 @@ public:
         return os;
     }
 
-    void executeProg(std::vector<int>& prog) {
+    void executeProg(std::vector<u_int8_t>& prog) {
         while(true)
             this->executeProg(prog, 1000);
     }
 
     // assumes one instruction per cycle
-    void executeProg(std::vector<int>& prog, int cycles) {
+    void executeProg(std::vector<u_int8_t>& prog, int cycles) {
         #define PC programCounter
 
         for(int i = 0; i < cycles; i++) {
@@ -49,8 +52,8 @@ public:
 
             switch(inst) {
                 case pushLiteral:
-                    this->stack.pushLiteral(prog[PC+1]);
-                    programCounter += 2;
+                    this->stack.pushLiteral(*(int*)&prog[PC+1]);
+                    programCounter += 5;
                     break;
                 case push_1:
                     this->stack.pushLiteral(1);
@@ -82,8 +85,8 @@ public:
                     programCounter++;
                     break;
                 case call:
-                    this->stack.pushLiteral(programCounter + 2);
-                    programCounter = prog[programCounter+1];
+                    this->stack.pushLiteral(programCounter + 5);
+                    programCounter = *(int*)&prog[programCounter+1];
                     break;
                 case pushRegister:
                     this->stack.pushLiteral(this->registers[prog[PC+1]]);
@@ -96,40 +99,47 @@ public:
                     break;
                 case branchZero:
                     if(!this->stack.getTop())
-                        programCounter = prog[PC + 1];
+                        programCounter = *(int*)&prog[PC + 1];
                     else
-                        programCounter += 2;
+                        programCounter += 5;
                     break;
                 case branchNZero:
                     if(this->stack.getTop())
-                        programCounter = prog[PC + 1];
+                        programCounter = *(int*)&prog[PC + 1];
                     else
-                        programCounter += 2;
+                        programCounter += 5;
                     break;
                 case ret:
                     programCounter = this->stack.getTop();
                     this->stack.popTop();
                     break;
                 case loads:
-                    this->registers[0] = this->stack.getIndex(prog[PC+1]);
-                    programCounter += 2;
+                    this->registers[0] = this->stack.getIndex(*(int*)&prog[PC+1]);
+                    programCounter += 5;
                     break;
                 case stores:
-                    this->stack.getIndex(prog[PC+1]) = this->registers[0];
-                    programCounter += 2;
+                    this->stack.getIndex(*(int*)&prog[PC+1]) = this->registers[0];
+                    programCounter += 5;
                     break;
                 case movr:
-                    throw std::runtime_error("'movr' semantics are not supported yet");
+                    this->registers[prog[PC+1]] = this->registers[prog[PC+2]];
+                    programCounter += 3;
                     break;
                 case halt:
-                    //this->isHalted = true;
                     throw std::runtime_error("Runtime -> VM HALT");
                     return; break;
-                case relative:
-                    programCounter += prog[PC+1];
-                    break;
                 case _goto:
-                    programCounter = prog[PC+1];
+                    programCounter = *(int*)&prog[PC+1];
+                    break;
+                case stamp:
+                    {
+                        timeval tv;
+                        gettimeofday(&tv, NULL);
+                        __int64_t s = tv.tv_sec * 1000000L + tv.tv_usec;
+                        int tf = (s / 1000); // ms timestamp
+                        this->stack.pushLiteral(tf);
+                    }
+                    programCounter++;
                     break;
                 default:
                     throw std::runtime_error("Runtime -> unknown instruction: " + std::to_string(inst));
