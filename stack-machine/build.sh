@@ -1,6 +1,6 @@
 #!/bin/bash
 
-g++ -o mystackvm main.cpp -I./libs -std=c++11 -ffast-math -march=native
+g++ -o mystackvm main.cpp -I./libs -std=c++11 -m64
 
 INSTALL_LOC="/usr/local/bin/"
 

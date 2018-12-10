@@ -3,6 +3,7 @@
 #include <Stack.h>
 #include <Runtime.h>
 #include <Assembler.h>
+#include <DynamicRecompiler.h>
 
 #include <string.h>
 
@@ -12,7 +13,7 @@ using namespace Instruction;
 int main(int argc, char* argv[]) {
 
     if(argc != 3) {
-        std::cout << "usage\n" << argv[0] << " <filename> <'run'|'step'|'dasm'>\n";
+        std::cout << "usage:\n" << argv[0] << " <filename> <'run'|'step'|'dasm'|'dynarec'>\n";
         return 1;
     }
 
@@ -38,6 +39,12 @@ int main(int argc, char* argv[]) {
     }
     else if(strcmp(argv[2], "dasm") == 0) {
         Instruction::dasm(prog);
+    }
+    else if(strcmp(argv[2], "dynarec") == 0) {
+        DynamicRecompiler dr(a);
+        int tmp_rf[8];
+        //dr(tmp_rf);
+        dr();
     }
     else {
         cout << "Invalid third option\n";
