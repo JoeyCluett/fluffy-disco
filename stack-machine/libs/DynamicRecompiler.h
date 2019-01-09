@@ -99,8 +99,7 @@ DynamicRecompiler::DynamicRecompiler(Assembler& assembler) {
     // we're just gonna keep track of EVERY 'opcode -> executable' translation 
     // because, at this point, the original translation data is gone and I 
     // dont feel like carrying it over
-    std::vector<int> jump_destination_translation;
-    jump_destination_translation.resize(prog.size());
+    std::map<int, int> jump_destination_translation;
 
     // while it is possible to jump TO anywhere in the code, we are not 
     // jumping FROM every location in the code. therefore we dont as need 
@@ -110,7 +109,8 @@ DynamicRecompiler::DynamicRecompiler(Assembler& assembler) {
 
     for(; PC < prog.size();) {
         // save all jump destinations as we iterate through
-        jump_destination_translation.at(PC) = recompiled_code.size();
+        //jump_destination_translation.at(PC) = recompiled_code.size();
+        
 
         u_int8_t i = prog[PC];
         switch(i) {
