@@ -15,6 +15,7 @@ typedef std::vector<std::string> string_vec_t;
 
 using namespace Instruction;
 
+// assumes little-endian format
 static void push_literal_to_instruction_vec(std::vector<u_int8_t>& vec, int lit) {
     vec.push_back(lit & 255);
     vec.push_back((lit >> 8) & 255);
@@ -56,6 +57,27 @@ private:
             std::map<int, std::string>& global_index_to_name, 
             int src, std::string dest) {
         global_index_to_name[src] = dest;
+    }
+
+    auto clean_register_reference(std::string s) -> int {
+        if(s[0] == 'r' || s[0] == '>') {
+            s.erase(s.begin());
+            return std::stoi(s);
+        }
+        else {
+            // assume a properly formatted string
+            return std::stoi(s);
+        }
+    }
+
+    int clean_stack_reference(std::string s) {
+        if(s[0] == 's' || s[0] == '$') {
+            s.erase(s.begin());
+            return stoi(s);
+        }
+        else {
+            return stoi(s);
+        }
     }
 
 public:
@@ -111,7 +133,7 @@ public:
                 case popRegister:
                     inst_vec.push_back(result);
                     //push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
-                    inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    inst_vec.push_back(clean_register_reference(prog.at(i+1)));
                     i += 2; break;
                 case branchZero: // branch if top of stack is zero
                 case branchNZero: // branch if top of stack is not zero
@@ -138,13 +160,13 @@ public:
                 case loads:
                 case stores:
                     inst_vec.push_back(result);
-                    push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
-                    //inst_vec.push_back(std::stoi(prog.at(i+1)));
+                    //push_literal_to_instruction_vec(inst_vec, std::stoi(prog.at(i+1)));
+                    inst_vec.push_back(clean_stack_reference(prog.at(i+1)));
                     i += 2; break;
                 case movr:
                     inst_vec.push_back(result);
-                    inst_vec.push_back(std::stoi(prog.at(i+1)));
-                    inst_vec.push_back(std::stoi(prog.at(i+2)));
+                    inst_vec.push_back(clean_register_reference(prog.at(i+1)));
+                    inst_vec.push_back(clean_register_reference(prog.at(i+2)));
                     i += 3;
                     break;
                 case halt:
@@ -172,9 +194,56 @@ public:
                 case stamp:
                     inst_vec.push_back(result);
                     i++; break;
+
+                // ======================================================
+                // ISA extensions
+                // ======================================================
+                case decs:
+                case incs:
+                    inst_vec.push_back(result);
+                    i++; break;
+
+                case decr:
+                case incr:
+                    inst_vec.push_back(result);
+                    inst_vec.push_back(clean_register_reference(prog.at(i+1)));
+                    i += 2; break;
+
+                case addi:
+                case subi:
+                    inst_vec.push_back(result);
+                    push_literal_to_instruction_vec(inst_vec, stoi(prog.at(i+1)));
+                    i += 2; break;
+
+                case popnone:
+                    inst_vec.push_back(result);
+                    i++; break;
+
+                case pushret:
+                    inst_vec.push_back(result);
+                    inst_vec.push_back(clean_register_reference(prog.at(i+1)));
+                    i += 2; break;
+
+                case bgtl:
+                case bltl:
+                    inst_vec.push_back(result);
+                    push_literal_to_instruction_vec(inst_vec, stoi(prog.at(i+1)));
+                    i += 2; break;
+                
+                case bgtz:
+                case bltz:
+                    inst_vec.push_back(result);
+                    i++; break;
+
+                case bgtr:
+                case bltr:
+                    inst_vec.push_back(result);
+                    inst_vec.push_back(clean_register_reference(prog.at(i+1)));
+                    i += 2; break;
+
                 default:
                     // result == -1
-                    // this is all keywords that are not instructions
+                    // this is all keywords that are not opcodes
                     if(str == "export") {
                         // place this label in the global table AND the 'local.' jump table
                         // if it already exists, error. otherwise, place it in the table
@@ -204,6 +273,9 @@ public:
                         // place this label ONLY in the local jump table
                         this->place_module_jump_destination(prog.at(i+1), inst_vec.size());
                         i += 2;
+                    }
+                    else {
+                        throw std::runtime_error("Module: During final assembly; Unknown instruction opcode: " + str);
                     }
                     break;
             }

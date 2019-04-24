@@ -11,6 +11,7 @@
 
 namespace Instruction {
 
+    // base instruction set
     const u_int8_t pushLiteral = 0;
     const u_int8_t push_1      = 1;
     const u_int8_t push_0      = 2;
@@ -32,13 +33,40 @@ namespace Instruction {
     const u_int8_t _goto       = 18;
     const u_int8_t stamp       = 19;
 
+    // ISA extensions
+    const u_int8_t decs    = 20;
+    const u_int8_t incs    = 21;
+    const u_int8_t decr    = 22;
+    const u_int8_t incr    = 23;
+    const u_int8_t addi    = 24;
+    const u_int8_t subi    = 25;
+    const u_int8_t popnone = 26;
+    const u_int8_t pushret = 27;
+    const u_int8_t bgtl    = 28;
+    const u_int8_t bltl    = 29;
+    const u_int8_t bgtz    = 30;
+    const u_int8_t bltz    = 31;
+    const u_int8_t bgtr    = 32;
+    const u_int8_t bltr    = 33;
+
     const std::map<std::string, const u_int8_t> instruction_strings = {
+        // standard ISA
         {"pushlit", pushLiteral}, {"push1", push_1}, {"push0", push_0},
         {"add", add}, {"sub", subtract}, {"mul", multiply}, {"div", divide},
         {"ptop", printTop}, {"call", call}, {"pushr", pushRegister}, {"popr", popRegister},
         {"bzero", branchZero}, {"bnzero", branchNZero}, {"ret", ret}, {"loads", loads},
         {"stores", stores}, {"movr", movr}, {"halt", halt}, {"goto", _goto},
-        {"stamp", stamp}
+        {"stamp", stamp},
+
+        // ISA extensions
+        {"decs", decs}, {"incs", incs}, {"decr", decr}, {"incr", incr}, {"popnone", popnone},
+        {"pushret", pushret}, {"bgtl", bgtl}, {"bltl", bltl}, {"bgtz", bgtz}, {"bltz", bltz},
+        {"bgtr", bgtr}, {"bltr", bltr},
+
+        // optional ISA extension decorator
+        {"x.decs", decs}, {"x.incs", incs}, {"x.decr", decr}, {"x.incr", incr}, {"x.popnone", popnone},
+        {"x.pushret", pushret}, {"x.bgtl", bgtl}, {"x.bltl", bltl}, {"x.bgtz", bgtz}, {"x.bltz", bltz},
+        {"x.bgtr", bgtr}, {"x.bltr", bltr}
     };
 
     // convenient way to determine if a given opcode is supported

@@ -116,7 +116,7 @@ private:
         [&]() {
             this->programCounter = this->stack.getTop();
             this->stack.popTop();
-        }.
+        },
 
         // [14] loads
         [&]() {

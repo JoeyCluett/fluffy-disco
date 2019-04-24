@@ -36,12 +36,22 @@ stamp               -- generates a timestamp and places on top of stack
 -- additional arithmetic instructions
 decs                -- decrement top of stack
 incs                -- increment top of stack
-decr                -- decrement register
-incr                -- increment register
+decr ##             -- decrement given register
+incr ##             -- increment given register
+addi ##             -- add immediate to top of stack
+subi ##             -- subtract immediate from top of stack
+
+-- instructions supporting additional move instructions
+popnone             -- pop the top of stack into nothing. this deletes the top of the stack
+pushret ##          -- push a register and return to that address
 
 -- additional branch instruction (test against literal values or register values)
+-- these mostly add ability to target literals, registers, and more functionality 
+-- targeting zero as an implied operand
 bgtl ## ####        -- branch if greater than literal
 bltl ## ####        -- branch if less than literal
+bgtz ####           -- branch if greater than zero ( same as 'bgtl 0 target.target' )
+bltz ####           -- branch if less than zero ( same as 'bltl 0 target.target' )
 bgtr ## ####        -- branch if greater than register; top of stack is compared against given register
 bltr ## ####        -- branch if less than register;    ***
 
