@@ -154,7 +154,21 @@ private:
             int tf = (s / 1000); // ms timestamp
             this->stack.pushLiteral(tf);
             this->programCounter++;
-        }
+        },
+
+        // [20] decs
+        [&]() {
+            this->stack.getIndex(0)--;
+            this->programCounter++;
+        },
+
+        // [21] incs
+        [&]() {
+            this->stack.getIndex(0)++;
+            this->programCounter++;
+        },
+
+        
     };
 
 public:

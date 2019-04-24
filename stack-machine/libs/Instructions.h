@@ -199,9 +199,16 @@ namespace Instruction {
     void dasm(std::vector<u_int8_t>& prog) {
         std::cout << "\n\nDisassembly:\n";
 
+        auto pad_addr = [](int in, int sz) -> std::string {
+            auto s = std::to_string(in);
+            while(s.size() < sz)
+                s = "0" + s;
+            return s;
+        };
+
         for(int i  = 0; i < prog.size();) {
             u_int8_t opcode = prog.at(i);
-            std::cout << "[" << i << "]: (" << (int)opcode << ") ";
+            std::cout << "[" << pad_addr(i, 5) << "]: (" << (int)opcode << ") ";
             switch(opcode) {
                 case pushLiteral:
                     std::cout <<  "push literal " << *(int*)&prog.at(i+1) << std::endl; 
@@ -264,6 +271,57 @@ namespace Instruction {
                 case stamp:
                     std::cout << "timestamp\n";
                     i++; break;
+
+                // =====================================================
+                // extended ISA
+                // =====================================================
+
+                case decs:
+                    std::cout << "decrement stack\n";
+                    i++; break;
+                case incs:
+                    std::cout << "increment stack\n";    
+                    i++; break;
+                case decr:
+                    std::cout << "decrement register [" << (int)prog.at(i+1) << "]\n";
+                    i += 2; break;
+                case incr:
+                    std::cout << "increment register [" << (int)prog.at(i+1) << "]\n";
+                    i += 2; break;
+                case addi:
+                    std::cout << "add immediate '" << *(int*)&prog.at(i+1) << "' to stack\n";
+                    i += 5; break;
+
+                case subi:
+                    std::cout << "subtract immediate '" << *(int*)&prog.at(i+1) << "' to stack\n";
+                    i += 5; break;
+
+                case popnone:
+                    std::cout << "delete top of stack\n";
+                    i++; break;
+
+                case pushret:
+                    std::cout << "push register [" << (int)prog.at(i+1) << "] and return\n";
+                    i += 2; break;
+
+                case bgtl:
+                    std::cout << "branch if greater than '" << *(int*)&prog.at(i+1) << "'\n";
+                    i += 5; break;
+                
+                case bltl:
+                    std::cout << "branch if less than '" << *(int*)&prog.at(i+1) << "'\n";
+                    i += 5; break;
+                
+                case bgtz:
+                case bltz:
+                    
+                    i++; break;
+
+                case bgtr:
+                case bltr:
+                    
+                    i += 2; break;
+
                 default:
                     throw std::runtime_error("DASM: unknown opcode"); break;
             }
