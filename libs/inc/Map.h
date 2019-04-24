@@ -23,4 +23,11 @@ T dist(T x1, T y1, T x2, T y2) {
     return std::sqrt(deltaX*deltaX + deltaY*deltaY);
 }
 
+template<typename T = float>
+T dist_2(T x1, T y1, T x2, T y2) {
+    T deltax = x2-x1;
+    T deltaY = y2-y1;
+    return std::sqrt(deltax*deltax + deltaY*deltaY);
+}
+
 #endif // __JJC__MAP__H__

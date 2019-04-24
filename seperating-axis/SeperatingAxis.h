@@ -1,6 +1,6 @@
 #pragma once
 
-#define real_t float
+typedef float real_t;
 
 /*
     Seperating Axis Theorem
@@ -27,5 +27,7 @@ namespace SAT {
         y = slope_a * x + intercept_a;
         return true;
     }
+
+    
 
 } // end of namespace SAT

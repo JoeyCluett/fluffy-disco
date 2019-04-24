@@ -175,6 +175,7 @@ DynamicRecompiler::DynamicRecompiler(Assembler& assembler) {
     std::cout << "Number jump sources: " << jump_source_map.size() << std::endl;
 }
 
+// register file pointer is passed as only argument
 void DynamicRecompiler::operator()(int* rf) {
     typedef void(*_M_called_function)(int*);
     auto callable = (_M_called_function)this->finalized_exec_code;

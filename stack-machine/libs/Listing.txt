@@ -4,6 +4,7 @@ push0               -- push a literal 0 onto the stack
 
 -- math operations always operate on the two values 
 -- on top of the stack, operands are always implicit
+-- result is always placed on top of stack
 add
 sub
 mul
@@ -13,8 +14,8 @@ ptop                -- print the top value of the stack to the console
 call ##             -- call a local or global subroutine
 pushr ##            -- push a specific register onto the stack
 popr ##             -- pop the top of the stack into a register
-bzero ##            -- branch to location if top of stack is zero
-bnzero ##           -- branch to location if top of stack is not zero
+bzero ####          -- branch to location if top of stack is zero
+bnzero ####         -- branch to location if top of stack is not zero
 ret                 -- address on top of stack is placed in program counter
 loads ##            -- load an element from the stack, uses an index from the top 
                         of the stack. i.e. 'loads 0' loads the most recently 
@@ -22,6 +23,32 @@ loads ##            -- load an element from the stack, uses an index from the to
                         used item. this does not remove the item from the stack
                         the loaded element is placed in register0
 stores ##           -- does the reverse of 'loads': register0 is placed somewhere in the stack
-movr                -- move a register value to another register
+movr ## ##          -- move a register value to another register
 halt                -- prevents the runtime from executing anymore instructions
 goto ##             -- unconditional jump to location
+
+stamp               -- generates a timestamp and places on top of stack
+
+-----------------------------------------------
+-- FUTURE ISA EXTENSIONS
+-----------------------------------------------
+
+-- additional arithmetic instructions
+decs                -- decrement top of stack
+incs                -- increment top of stack
+decr                -- decrement register
+incr                -- increment register
+
+-- additional branch instruction (test against literal values or register values)
+bgtl ## ####        -- branch if greater than literal
+bltl ## ####        -- branch if less than literal
+bgtr ## ####        -- branch if greater than register; top of stack is compared against given register
+bltr ## ####        -- branch if less than register;    ***
+
+-- instructions supporting the idea of a stack frame (going to make JIT development 
+-- miserable but worth it in the long run). none of these instructions really make 
+-- sense without a stack frame pointer (distinct from a stack pointer)
+pushsfp             -- push stack frame pointer onto stack
+popsfp              -- pop stack frame pointer from top of stack
+clearsfp            -- clear stack frame pointer (set to zero)
+

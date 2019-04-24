@@ -14,7 +14,7 @@ export Factorial # <number> <return address>
 
     # get the next multiplicand off of the stack and multiply
     loads 2
-    pushr 0  
+    pushr 0 
     mul
 
     # store the new result in a place the caller 
